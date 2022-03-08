@@ -1,0 +1,70 @@
+<html>
+    <head>
+        <title>Ukrainian MULTEX 4.0 lookup</title>
+        <script>
+            var lookup_table = {};
+            var loaded = false;
+
+            function onLoad(){
+                fetch("lookup.json")
+                    .then(function(response){
+                        response.json().then(function(json){
+                            lookup_table = json
+                            loaded = true;
+                            setupInput();
+                        });
+                    });
+            };
+
+            function setupInput(){
+                var lookup = document.getElementById("lookup");
+                lookup.addEventListener("input", onLookupChange);
+                lookup.focus();
+            }
+
+            function onLookupChange(e){
+                var newText = e.target.value;
+
+                if(newText.length == 0){
+                    return;
+                }
+                var start = newText.substr(0, 5);
+                var results = lookup_table[start]
+
+                if(!results){
+                    return;
+                }
+
+                if(newText.length > 5){
+                    var filteredResults = [];
+                    results.forEach(function(element){
+                        if(element[0].startsWith(newText)){
+                            filteredResults.push(element);
+                        }
+                    });
+                    results = filteredResults;
+                }
+
+                var displayResults = results.slice(0, 10);
+                var output = document.getElementById("output");
+                output.innerHTML = "";
+                displayResults.forEach(element => {
+                    var container = document.createElement("div");
+                    var containerText = document.createTextNode(element.join(", "));
+                    container.appendChild(containerText);
+                    output.appendChild(container);
+                });
+            }
+        </script>
+    </head>
+    <body onload="onLoad()">
+        <form>
+            <div>
+                <input name="lookup" id="lookup" type="text" />
+            </div>
+            <div id="output">
+
+            </div>
+        </form>
+    </body>
+</html>
